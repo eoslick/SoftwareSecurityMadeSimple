@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_ROOT_PASSWORD=${POSTGRES_ROOT_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db:/var/lib/postgresql/data:rw
+      - ./sql:/docker-entrypoint-initdb.d
+  web-application:
+    image: ${WEBAPP_IMAGE}
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ui
+      - SPRING_DATASOURCE_USERNAME=vaadin
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_DB_PASSWORD}
+    ports:
+      - '8050:8050'
+volumes:
+  db:
+    driver: local
